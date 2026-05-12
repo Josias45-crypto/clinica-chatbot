@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Clínica Salud Total — Atención al Cliente</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fraunces:wght@600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --brand:       #0077B6;
+    --brand-dark:  #023E8A;
+    --brand-light: #CAF0F8;
+    --accent:      #00B4D8;
+    --success:     #06D6A0;
+    --bg:          #F0F4F8;
+    --surface:     #FFFFFF;
+    --text:        #1A2B3C;
+    --muted:       #5E7A90;
+    --border:      #D9E6F0;
+    --bot-bubble:  #FFFFFF;
+    --user-bubble: #0077B6;
+    --shadow:      0 4px 24px rgba(0,119,182,0.10);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  /* ── Wrapper ── */
+  .chat-wrapper {
+    width: 100%;
+    max-width: 480px;
+    height: 88vh;
+    max-height: 760px;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  /* ── Header ── */
+  .chat-header {
+    background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 100%);
+    padding: 1.1rem 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 22px;
+  }
+
+  .header-info { flex: 1; }
+
+  .header-name {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    color: #fff;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+  }
+
+  .header-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.70);
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--success);
+    display: inline-block;
+  }
+
+  .header-hours {
+    font-size: 11px;
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.85);
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  /* ── Quick chips ── */
+  .chips-bar {
+    padding: 10px 14px 6px;
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+  }
+  .chips-bar::-webkit-scrollbar { display: none; }
+
+  .chip {
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--brand-light);
+    color: var(--brand-dark);
+    border: 1px solid #90E0EF;
+    border-radius: 20px;
+    padding: 5px 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, transform 0.1s;
+    flex-shrink: 0;
+  }
+  .chip:hover { background: #90E0EF; transform: translateY(-1px); }
+  .chip:active { transform: scale(0.97); }
+
+  /* ── Messages ── */
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .msg-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    animation: fadeUp 0.22s ease;
+  }
+  .msg-row.user { flex-direction: row-reverse; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--brand-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .bubble {
+    max-width: 78%;
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.55;
+    word-break: break-word;
+  }
+
+  .bot .bubble {
+    background: var(--bot-bubble);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+  }
+
+  .user .bubble {
+    background: var(--user-bubble);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+
+  .bubble-time {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 3px;
+    padding: 0 4px;
+    text-align: right;
+  }
+  .user .bubble-time { text-align: left; }
+
+  /* Typing indicator */
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 14px;
+    background: var(--bot-bubble);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+    width: fit-content;
+  }
+  .typing-indicator span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--brand);
+    animation: bounce 1.2s infinite;
+  }
+  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30%            { transform: translateY(-5px); opacity: 1; }
+  }
+
+  /* ── Input area ── */
+  .input-area {
+    padding: 12px 14px 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    flex-shrink: 0;
+    background: var(--surface);
+  }
+
+  #user-input {
+    flex: 1;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 22px;
+    outline: none;
+    resize: none;
+    max-height: 100px;
+    line-height: 1.45;
+    color: var(--text);
+    background: var(--bg);
+    transition: border-color 0.15s;
+  }
+  #user-input::placeholder { color: var(--muted); }
+  #user-input:focus { border-color: var(--accent); }
+
+  #send-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--brand);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, transform 0.1s;
+  }
+  #send-btn:hover { background: var(--brand-dark); transform: scale(1.05); }
+  #send-btn:active { transform: scale(0.95); }
+  #send-btn:disabled { background: var(--border); cursor: not-allowed; transform: none; }
+
+  #send-btn svg { width: 18px; height: 18px; fill: #fff; }
+
+  .footer-note {
+    text-align: center;
+    font-size: 10.5px;
+    color: var(--muted);
+    padding: 0 14px 8px;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="chat-wrapper">
+
+  <!-- Header -->
+  <div class="chat-header">
+    <div class="avatar">🏥</div>
+    <div class="header-info">
+      <div class="header-name">Clínica Salud Total</div>
+      <div class="header-sub">
+        <span class="status-dot"></span>
+        Salud — Asistente Virtual
+      </div>
+    </div>
+    <div class="header-hours">Lun–Sáb 8am–6pm</div>
+  </div>
+
+  <!-- Quick chips -->
+  <div class="chips-bar">
+    <button class="chip" onclick="sendChip('¿Qué servicios ofrecen?')">📋 Servicios</button>
+    <button class="chip" onclick="sendChip('¿Cuáles son los precios?')">💰 Precios</button>
+    <button class="chip" onclick="sendChip('¿Cómo agendo una cita?')">📅 Citas</button>
+    <button class="chip" onclick="sendChip('¿Cuál es el horario?')">🕐 Horario</button>
+    <button class="chip" onclick="sendChip('¿Tienen pediatría?')">👶 Pediatría</button>
+  </div>
+
+  <!-- Messages -->
+  <div class="messages" id="messages"></div>
+
+  <!-- Input -->
+  <div class="input-area">
+    <textarea id="user-input" rows="1" placeholder="Escribe tu consulta…"></textarea>
+    <button id="send-btn" onclick="sendMessage()" aria-label="Enviar">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+      </svg>
+    </button>
+  </div>
+  <div class="footer-note">Asistente IA · Solo informativa · No reemplaza consulta médica</div>
+
+</div>
+
+<script>
+const API_URL = 'http://localhost:8000/chat';
+let history = [];
+let isTyping = false;
+
+const messagesEl = document.getElementById('messages');
+const inputEl    = document.getElementById('user-input');
+const sendBtn    = document.getElementById('send-btn');
+
+function getTime() {
+  return new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+}
+
+function addMessage(role, text) {
+  const isUser = role === 'user';
+  const row = document.createElement('div');
+  row.className = `msg-row ${isUser ? 'user' : 'bot'}`;
+
+  const avatarHTML = isUser
+    ? `<div class="msg-avatar">👤</div>`
+    : `<div class="msg-avatar">🏥</div>`;
+
+  row.innerHTML = `
+    ${avatarHTML}
+    <div>
+      <div class="bubble">${escapeHTML(text)}</div>
+      <div class="bubble-time">${getTime()}</div>
+    </div>
+  `;
+  messagesEl.appendChild(row);
+  scrollBottom();
+  return row;
+}
+
+function showTyping() {
+  const row = document.createElement('div');
+  row.className = 'msg-row bot';
+  row.id = 'typing-row';
+  row.innerHTML = `
+    <div class="msg-avatar">🏥</div>
+    <div class="typing-indicator">
+      <span></span><span></span><span></span>
+    </div>
+  `;
+  messagesEl.appendChild(row);
+  scrollBottom();
+}
+
+function hideTyping() {
+  const el = document.getElementById('typing-row');
+  if (el) el.remove();
+}
+
+function scrollBottom() {
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function escapeHTML(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br>');
+}
+
+async function sendMessage(customText) {
+  const text = customText || inputEl.value.trim();
+  if (!text || isTyping) return;
+
+  inputEl.value = '';
+  inputEl.style.height = 'auto';
+  isTyping = true;
+  sendBtn.disabled = true;
+
+  addMessage('user', text);
+  showTyping();
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ history, message: text })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.detail || 'Error del servidor');
+
+    hideTyping();
+    addMessage('assistant', data.reply);
+
+    history.push({ role: 'user',      content: text       });
+    history.push({ role: 'assistant', content: data.reply });
+
+  } catch (err) {
+    hideTyping();
+    addMessage('assistant', '⚠️ Lo siento, tuve un problema de conexión. Por favor intenta de nuevo o escríbenos al +51 999 000 111.');
+    console.error(err);
+  } finally {
+    isTyping = false;
+    sendBtn.disabled = false;
+    inputEl.focus();
+  }
+}
+
+function sendChip(text) {
+  sendMessage(text);
+}
+
+// Auto-resize textarea
+inputEl.addEventListener('input', () => {
+  inputEl.style.height = 'auto';
+  inputEl.style.height = Math.min(inputEl.scrollHeight, 100) + 'px';
+});
+
+// Enter to send (Shift+Enter for newline)
+inputEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+// Welcome message
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    addMessage('assistant', '¡Hola! 👋 Soy Salud, tu asistente virtual de Clínica Salud Total.\n\n¿En qué puedo ayudarte hoy? Puedo informarte sobre nuestros servicios, precios, horarios y cómo agendar una cita.');
+  }, 400);
+});
+</script>
+</body>
+</html>
