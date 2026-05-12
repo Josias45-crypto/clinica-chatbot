@@ -332,7 +332,7 @@
 </div>
 
 <script>
-const API_URL = 'https://clinica-chatbot-k8in.onrender.com';
+const API_URL = 'https://clinica-chatbot-k8in.onrender.com/chat';
 let history = [];
 let isTyping = false;
 
@@ -409,7 +409,7 @@ async function sendMessage(customText) {
   showTyping();
 
   try {
-    const res = await fetch(API_URL, {
+    const res = await fetch(API_URL + '/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ history, message: text })
