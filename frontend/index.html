@@ -35,7 +35,6 @@
     padding: 1rem;
   }
 
-  /* ── Wrapper ── */
   .chat-wrapper {
     width: 100%;
     max-width: 480px;
@@ -50,7 +49,6 @@
     border: 1px solid var(--border);
   }
 
-  /* ── Header ── */
   .chat-header {
     background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 100%);
     padding: 1.1rem 1.4rem;
@@ -108,7 +106,6 @@
     white-space: nowrap;
   }
 
-  /* ── Quick chips ── */
   .chips-bar {
     padding: 10px 14px 6px;
     display: flex;
@@ -136,7 +133,6 @@
   .chip:hover { background: #90E0EF; transform: translateY(-1px); }
   .chip:active { transform: scale(0.97); }
 
-  /* ── Messages ── */
   .messages {
     flex: 1;
     overflow-y: auto;
@@ -205,7 +201,6 @@
   }
   .user .bubble-time { text-align: left; }
 
-  /* Typing indicator */
   .typing-indicator {
     display: flex;
     align-items: center;
@@ -232,7 +227,6 @@
     30%            { transform: translateY(-5px); opacity: 1; }
   }
 
-  /* ── Input area ── */
   .input-area {
     padding: 12px 14px 14px;
     border-top: 1px solid var(--border);
@@ -277,7 +271,6 @@
   #send-btn:hover { background: var(--brand-dark); transform: scale(1.05); }
   #send-btn:active { transform: scale(0.95); }
   #send-btn:disabled { background: var(--border); cursor: not-allowed; transform: none; }
-
   #send-btn svg { width: 18px; height: 18px; fill: #fff; }
 
   .footer-note {
@@ -293,7 +286,6 @@
 
 <div class="chat-wrapper">
 
-  <!-- Header -->
   <div class="chat-header">
     <div class="avatar">🏥</div>
     <div class="header-info">
@@ -306,7 +298,6 @@
     <div class="header-hours">Lun–Sáb 8am–6pm</div>
   </div>
 
-  <!-- Quick chips -->
   <div class="chips-bar">
     <button class="chip" onclick="sendChip('¿Qué servicios ofrecen?')">📋 Servicios</button>
     <button class="chip" onclick="sendChip('¿Cuáles son los precios?')">💰 Precios</button>
@@ -315,10 +306,8 @@
     <button class="chip" onclick="sendChip('¿Tienen pediatría?')">👶 Pediatría</button>
   </div>
 
-  <!-- Messages -->
   <div class="messages" id="messages"></div>
 
-  <!-- Input -->
   <div class="input-area">
     <textarea id="user-input" rows="1" placeholder="Escribe tu consulta…"></textarea>
     <button id="send-btn" onclick="sendMessage()" aria-label="Enviar">
@@ -348,11 +337,9 @@ function addMessage(role, text) {
   const isUser = role === 'user';
   const row = document.createElement('div');
   row.className = `msg-row ${isUser ? 'user' : 'bot'}`;
-
   const avatarHTML = isUser
     ? `<div class="msg-avatar">👤</div>`
     : `<div class="msg-avatar">🏥</div>`;
-
   row.innerHTML = `
     ${avatarHTML}
     <div>
@@ -409,14 +396,13 @@ async function sendMessage(customText) {
   showTyping();
 
   try {
-    const res = await fetch(API_URL + '/chat', {
+    const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ history, message: text })
     });
 
     const data = await res.json();
-
     if (!res.ok) throw new Error(data.detail || 'Error del servidor');
 
     hideTyping();
@@ -440,13 +426,11 @@ function sendChip(text) {
   sendMessage(text);
 }
 
-// Auto-resize textarea
 inputEl.addEventListener('input', () => {
   inputEl.style.height = 'auto';
   inputEl.style.height = Math.min(inputEl.scrollHeight, 100) + 'px';
 });
 
-// Enter to send (Shift+Enter for newline)
 inputEl.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
@@ -454,7 +438,6 @@ inputEl.addEventListener('keydown', e => {
   }
 });
 
-// Welcome message
 window.addEventListener('load', () => {
   setTimeout(() => {
     addMessage('assistant', '¡Hola! 👋 Soy Salud, tu asistente virtual de Clínica Salud Total.\n\n¿En qué puedo ayudarte hoy? Puedo informarte sobre nuestros servicios, precios, horarios y cómo agendar una cita.');
