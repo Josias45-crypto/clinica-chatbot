@@ -1,0 +1,17 @@
+{
+  "clinic_name": "Clínica Salud Total",
+  "founded": 2010,
+  "bot_name": "Carlos",
+  "whatsapp": "+51 929 201 444",
+  "phone": "(062) 51-2800",
+  "address": "Av. Principal s/n, Jr. Huánuco, Huánuco",
+  "hours": {
+    "weekdays": "Lunes a Sábado 8:00am – 6:00pm",
+    "weekends": "Domingos y feriados: CERRADO"
+  },
+  "specialties": [
+    { "name": "Medicina General", "price_soles": 40 },
+    { "name": "Odontología",      "price_soles": 50 },
+    { "name": "Pediatría",        "price_soles": 30 }
+  ]
+}

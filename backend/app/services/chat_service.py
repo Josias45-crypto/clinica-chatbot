@@ -1,22 +1,21 @@
 """
-config.py — Configuración del cliente Groq y personalidad del chatbot.
+chat_service.py — Lógica de negocio del chat.
+
+Esta capa es la única que conoce cómo hablar con Groq.
+Las routes solo llaman a get_chat_reply() y devuelven el resultado —
+no saben nada del LLM, del system prompt ni del formato de mensajes.
 """
 
-import os
-from openai import OpenAI
-from dotenv import load_dotenv
+import logging
+from fastapi import HTTPException
 
-load_dotenv()
+from app.core.config import get_settings
+from app.core.groq_client import groq_client
+from app.models.schemas import Message
 
-# ── Cliente Groq (compatible con el SDK de OpenAI) ─────────────────────────────
-client = OpenAI(
-    api_key=os.getenv("GROQ_API_KEY"),
-    base_url="https://api.groq.com/openai/v1",
-)
+logger = logging.getLogger(__name__)
 
-MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
-
-# ── Personalidad y conocimiento del chatbot ───────────────────────────────────
+# TODO: Phase 2 — leer system prompt desde app/data/clinic_data.json
 SYSTEM_PROMPT = """
 Eres Carlos, el asistente virtual de Clínica Salud Total.
 Tu personalidad es muy cálida y empática — como un recepcionista con mucha experiencia.
@@ -87,3 +86,34 @@ MEDIDAS DE HIGIENE Y BIOSEGURIDAD
 7. NUNCA des consejos médicos, diagnósticos ni nombres de medicamentos.
 8. Cuando el paciente quiera agendar, dile siempre el número de WhatsApp.
 """.strip()
+
+
+async def get_chat_reply(history: list[Message], message: str) -> tuple[str, str]:
+    """
+    Arma el hilo de mensajes y llama a Groq.
+    Devuelve (reply_text, model_used).
+    """
+    settings = get_settings()
+
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    for msg in history:
+        messages.append({"role": msg.role, "content": msg.content})
+    messages.append({"role": "user", "content": message})
+
+    logger.info("Enviando %d mensajes al modelo %s", len(messages), settings.groq_model)
+
+    try:
+        response = await groq_client.chat.completions.create(
+            model=settings.groq_model,
+            messages=messages,
+            max_tokens=512,
+            temperature=0.6,
+        )
+    except Exception as exc:
+        logger.error("Error Groq API: %s", exc)
+        raise HTTPException(status_code=502, detail=f"Error al contactar Groq: {exc}")
+
+    reply_text = response.choices[0].message.content.strip()
+    logger.info("Respuesta recibida (%d chars)", len(reply_text))
+
+    return reply_text, settings.groq_model

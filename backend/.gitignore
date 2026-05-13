@@ -1,0 +1,14 @@
+# Entorno
+.env
+venv/
+.venv/
+__pycache__/
+*.pyc
+.python-version
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
