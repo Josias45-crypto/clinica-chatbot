@@ -18,13 +18,22 @@ class Settings(BaseSettings):
     groq_model: str = "llama-3.3-70b-versatile"
 
     # ── Supabase ───────────────────────────────────────────────────────────────
-    # URL del proyecto Supabase: Settings → API → Project URL
+    # URL del proyecto: Supabase → Settings → API → Project URL
     supabase_url: str
-    # Service role key (acceso total, nunca exponerla en el frontend)
-    # Settings → API → Project API keys → service_role
+    # Service role key: Supabase → Settings → API → service_role
     supabase_key: str
-    # Slug de la clínica activa en esta instancia del servidor
+    # Slug de la clínica activa en esta instancia
     clinic_slug: str = "medivida"
+
+    # ── Admin panel ───────────────────────────────────────────────────────────
+    admin_username: str = "admin"
+    # Hash bcrypt del password. Generar con:
+    # python -c "from passlib.context import CryptContext; \
+    #   ctx = CryptContext(schemes=['bcrypt']); print(ctx.hash('tu_password'))"
+    admin_password_hash: str
+    # Secret aleatorio de 32+ caracteres para firmar los JWT.
+    # Generar con: python -c "import secrets; print(secrets.token_hex(32))"
+    admin_secret_key: str
 
     # ── Metadatos de la API ────────────────────────────────────────────────────
     app_title: str = "Nexvora Chatbot API"
@@ -34,7 +43,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
-        case_sensitive=False,   # GROQ_API_KEY == groq_api_key
+        case_sensitive=False,
     )
 
 

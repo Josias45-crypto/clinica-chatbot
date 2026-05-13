@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
-from app.api.routes import chat, health
+from app.api.routes import chat, health, admin
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s │ %(message)s")
 
@@ -22,13 +22,14 @@ app = FastAPI(
     version=settings.app_version,
 )
 
-# CORS abierto durante desarrollo — restringir origins en producción (Fase 3)
+# CORS abierto durante desarrollo — restringir origins en producción (Fase 5)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "PUT"],
     allow_headers=["*"],
 )
 
 app.include_router(chat.router)
 app.include_router(health.router)
+app.include_router(admin.router, prefix="/admin")

@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediVida Admin</title>
+  <style>
+    /* ── Variables ── */
+    :root {
+      --brand:   #0077B6;
+      --brand-d: #005f92;
+      --accent:  #00B4D8;
+      --bg:      #f0f4f8;
+      --card:    #ffffff;
+      --text:    #1a1a2e;
+      --muted:   #6b7280;
+      --border:  #e2e8f0;
+      --danger:  #ef4444;
+      --success: #22c55e;
+      --radius:  10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Login ── */
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .login-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    .login-card h1 {
+      color: var(--brand);
+      font-size: 1.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .login-card p {
+      color: var(--muted);
+      font-size: 0.875rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.65rem 0.9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--brand);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.65rem 1.25rem;
+      border: none;
+      border-radius: 7px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn:active { transform: scale(0.98); }
+
+    .btn-primary { background: var(--brand); color: #fff; width: 100%; }
+    .btn-primary:hover { background: var(--brand-d); }
+    .btn-sm { padding: 0.4rem 0.85rem; font-size: 0.8rem; }
+    .btn-ghost { background: var(--border); color: var(--text); }
+    .btn-ghost:hover { background: #d1d5db; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-success { background: var(--success); color: #fff; }
+
+    .error-msg {
+      background: #fee2e2;
+      color: var(--danger);
+      border-radius: 7px;
+      padding: 0.65rem 0.9rem;
+      font-size: 0.875rem;
+      margin-top: 0.75rem;
+      display: none;
+    }
+
+    /* ── Dashboard ── */
+    #dashboard { display: none; }
+
+    header {
+      background: var(--brand);
+      color: #fff;
+      padding: 0 1.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    header h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.02em; }
+    header span { font-size: 0.8rem; opacity: 0.75; margin-left: 0.5rem; }
+
+    .btn-logout {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      border: none;
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,0.25); }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 1.75rem 1.25rem; }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 0.6rem 1.1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2.5px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .tab-btn.active {
+      color: var(--brand);
+      border-bottom-color: var(--brand);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Métricas ── */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .metric-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      border-left: 4px solid var(--brand);
+    }
+
+    .metric-card .label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+    }
+
+    .metric-card .value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--brand);
+      line-height: 1;
+    }
+
+    .metric-card.today { border-left-color: var(--accent); }
+    .metric-card.today .value { color: var(--accent); }
+
+    /* ── Tabla ── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    th {
+      background: #f8fafc;
+      padding: 0.7rem 1rem;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #e0f2fe;
+      color: var(--brand);
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      padding: 0.85rem 1.25rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--card);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 560px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    }
+
+    .modal-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+    }
+
+    .modal-body {
+      padding: 1rem 1.25rem;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .bubble {
+      max-width: 80%;
+      padding: 0.65rem 0.9rem;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .bubble.user {
+      background: var(--brand);
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 3px;
+    }
+
+    .bubble.assistant {
+      background: #f1f5f9;
+      color: var(--text);
+      align-self: flex-start;
+      border-bottom-left-radius: 3px;
+    }
+
+    .bubble-meta {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    .bubble-wrap { display: flex; flex-direction: column; }
+    .bubble-wrap.user { align-items: flex-end; }
+    .bubble-wrap.assistant { align-items: flex-start; }
+
+    /* ── Config form ── */
+    .config-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 600px) {
+      .config-grid { grid-template-columns: 1fr; }
+      .metrics-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .config-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      margin-top: 1.25rem;
+    }
+
+    .status-msg {
+      font-size: 0.875rem;
+      padding: 0.5rem 0.85rem;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-msg.success { background: #dcfce7; color: #166534; display: block; }
+    .status-msg.error   { background: #fee2e2; color: #991b1b; display: block; }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     LOGIN
+══════════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <h1>MediVida Admin</h1>
+    <p>Panel de administración — Nexvora Systems</p>
+    <div class="form-group">
+      <label>Usuario</label>
+      <input type="text" id="login-user" placeholder="admin" autocomplete="username" />
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+    <button class="btn btn-primary" onclick="doLogin()">
+      <span id="login-text">Ingresar</span>
+      <div class="spinner" id="login-spinner"></div>
+    </button>
+    <div class="error-msg" id="login-error">Credenciales incorrectas. Inténtalo de nuevo.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     DASHBOARD
+══════════════════════════════════════════════════════ -->
+<div id="dashboard">
+  <header>
+    <div>
+      <h1>MediVida Admin <span>Panel de control</span></h1>
+    </div>
+    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+  </header>
+
+  <main>
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('stats')">Dashboard</button>
+      <button class="tab-btn" onclick="switchTab('conversations')">Conversaciones</button>
+      <button class="tab-btn" onclick="switchTab('config')">Configuración</button>
+    </div>
+
+    <!-- ── Tab: Stats ── -->
+    <div class="tab-panel active" id="tab-stats">
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="label">Total conversaciones</div>
+          <div class="value" id="m-total-conv">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Total mensajes</div>
+          <div class="value" id="m-total-msg">—</div>
+        </div>
+        <div class="metric-card today">
+          <div class="label">Conversaciones hoy</div>
+          <div class="value" id="m-today-conv">—</div>
+        </div>
+        <div class="metric-card today">
+          <div class="label">Mensajes hoy</div>
+          <div class="value" id="m-today-msg">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Tab: Conversaciones ── -->
+    <div class="tab-panel" id="tab-conversations">
+      <div class="card">
+        <div class="card-header">Conversaciones recientes</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Mensajes</th>
+              <th>Sesión</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="conv-tbody">
+            <tr><td colspan="5" class="empty-state">Cargando...</td></tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <button class="btn btn-ghost btn-sm" id="btn-prev" onclick="changePage(-1)" disabled>← Anterior</button>
+          <span id="page-label">Página 1</span>
+          <button class="btn btn-ghost btn-sm" id="btn-next" onclick="changePage(1)">Siguiente →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Tab: Configuración ── -->
+    <div class="tab-panel" id="tab-config">
+      <div class="card">
+        <div class="card-header">Datos de la clínica</div>
+        <div style="padding: 1.25rem;">
+          <div class="config-grid">
+            <div class="form-group">
+              <label>Nombre de la clínica</label>
+              <input type="text" id="cfg-name" />
+            </div>
+            <div class="form-group">
+              <label>Slogan</label>
+              <input type="text" id="cfg-slogan" />
+            </div>
+            <div class="form-group">
+              <label>Ciudad</label>
+              <input type="text" id="cfg-city" />
+            </div>
+            <div class="form-group">
+              <label>Dirección</label>
+              <input type="text" id="cfg-address" />
+            </div>
+            <div class="form-group">
+              <label>WhatsApp</label>
+              <input type="text" id="cfg-whatsapp" />
+            </div>
+            <div class="form-group">
+              <label>Teléfono</label>
+              <input type="text" id="cfg-phone" />
+            </div>
+            <div class="form-group">
+              <label>Horario Lun–Vie</label>
+              <input type="text" id="cfg-sched-wk" />
+            </div>
+            <div class="form-group">
+              <label>Horario Sábado</label>
+              <input type="text" id="cfg-sched-sat" />
+            </div>
+          </div>
+          <div class="config-actions">
+            <button class="btn btn-primary" style="width:auto" onclick="saveConfig()">Guardar cambios</button>
+            <div class="status-msg" id="cfg-status"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL — detalle de conversación
+══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="modal-title">Conversación</span>
+      <button class="btn btn-ghost btn-sm" onclick="closeModalDirect()">✕ Cerrar</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+  // ── Configuración ──────────────────────────────────────────────────────────
+  const API_URL = 'https://clinica-chatbot-k8in.onrender.com';
+
+  let currentPage = 1;
+  let clinicDataCache = null;
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
+  function getToken() { return localStorage.getItem('admin_token'); }
+
+  function authHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getToken()}`,
+    };
+  }
+
+  async function apiFetch(path, opts = {}) {
+    const res = await fetch(API_URL + path, {
+      headers: authHeaders(),
+      ...opts,
+    });
+    if (res.status === 401) { logout(); return null; }
+    return res;
+  }
+
+  function fmtDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  function fmtTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  // ── Auth ───────────────────────────────────────────────────────────────────
+
+  async function doLogin() {
+    const user = document.getElementById('login-user').value.trim();
+    const pass = document.getElementById('login-pass').value;
+    const errEl = document.getElementById('login-error');
+    const spinner = document.getElementById('login-spinner');
+    const text = document.getElementById('login-text');
+
+    errEl.style.display = 'none';
+    spinner.style.display = 'block';
+    text.style.display = 'none';
+
+    try {
+      const res = await fetch(`${API_URL}/admin/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: user, password: pass }),
+      });
+
+      if (!res.ok) {
+        errEl.style.display = 'block';
+      } else {
+        const data = await res.json();
+        localStorage.setItem('admin_token', data.access_token);
+        showDashboard();
+      }
+    } catch {
+      errEl.textContent = 'Error de conexión con el servidor.';
+      errEl.style.display = 'block';
+    } finally {
+      spinner.style.display = 'none';
+      text.style.display = 'inline';
+    }
+  }
+
+  document.getElementById('login-pass').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  function logout() {
+    localStorage.removeItem('admin_token');
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+
+  // ── Inicialización ─────────────────────────────────────────────────────────
+
+  async function showDashboard() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    loadStats();
+    loadConversations();
+    loadConfig();
+  }
+
+  // ── Stats ──────────────────────────────────────────────────────────────────
+
+  async function loadStats() {
+    const res = await apiFetch('/admin/stats');
+    if (!res) return;
+    const d = await res.json();
+    document.getElementById('m-total-conv').textContent = d.total_conversations;
+    document.getElementById('m-total-msg').textContent  = d.total_messages;
+    document.getElementById('m-today-conv').textContent = d.conversations_today;
+    document.getElementById('m-today-msg').textContent  = d.messages_today;
+  }
+
+  // ── Conversaciones ─────────────────────────────────────────────────────────
+
+  async function loadConversations() {
+    const tbody = document.getElementById('conv-tbody');
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Cargando...</td></tr>';
+
+    const res = await apiFetch(`/admin/conversations?page=${currentPage}&limit=20`);
+    if (!res) return;
+    const data = await res.json();
+    const rows = data.data;
+
+    document.getElementById('page-label').textContent = `Página ${currentPage}`;
+    document.getElementById('btn-prev').disabled = currentPage === 1;
+    document.getElementById('btn-next').disabled = rows.length < 20;
+
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Sin conversaciones aún.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${fmtDate(r.started_at)}</td>
+        <td>${fmtTime(r.started_at)}</td>
+        <td><span class="badge">${r.message_count ?? 0}</span></td>
+        <td style="font-size:0.75rem;color:var(--muted)">${r.session_id.slice(0,8)}…</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="openConversation('${r.id}')">Ver</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function changePage(delta) {
+    currentPage = Math.max(1, currentPage + delta);
+    loadConversations();
+  }
+
+  // ── Modal ──────────────────────────────────────────────────────────────────
+
+  async function openConversation(id) {
+    document.getElementById('modal-title').textContent = 'Cargando...';
+    document.getElementById('modal-body').innerHTML = '';
+    document.getElementById('modal-overlay').classList.add('open');
+
+    const res = await apiFetch(`/admin/conversations/${id}/messages`);
+    if (!res) return;
+    const data = await res.json();
+
+    document.getElementById('modal-title').textContent =
+      `Conversación — ${data.messages.length} mensajes`;
+
+    document.getElementById('modal-body').innerHTML = data.messages.map(m => `
+      <div class="bubble-wrap ${m.role}">
+        <div class="bubble ${m.role}">${escapeHtml(m.content)}</div>
+        <div class="bubble-meta">${fmtTime(m.created_at)}</div>
+      </div>
+    `).join('');
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModalDirect();
+  }
+
+  function closeModalDirect() {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Configuración ──────────────────────────────────────────────────────────
+
+  async function loadConfig() {
+    const res = await apiFetch('/admin/clinic-data');
+    // Si el endpoint no existe aún, leer del JSON cacheado no es posible.
+    // En su lugar construimos desde los campos actuales si los tenemos.
+    if (!res || !res.ok) return;
+    const data = await res.json();
+    clinicDataCache = data;
+    populateConfigForm(data);
+  }
+
+  function populateConfigForm(d) {
+    if (!d) return;
+    document.getElementById('cfg-name').value      = d.clinic?.name       ?? '';
+    document.getElementById('cfg-slogan').value    = d.clinic?.slogan     ?? '';
+    document.getElementById('cfg-city').value      = d.clinic?.city       ?? '';
+    document.getElementById('cfg-address').value   = d.clinic?.address    ?? '';
+    document.getElementById('cfg-whatsapp').value  = d.contact?.whatsapp  ?? '';
+    document.getElementById('cfg-phone').value     = d.contact?.phone     ?? '';
+    document.getElementById('cfg-sched-wk').value  = d.schedule?.monday_friday ?? '';
+    document.getElementById('cfg-sched-sat').value = d.schedule?.saturday ?? '';
+  }
+
+  async function saveConfig() {
+    const statusEl = document.getElementById('cfg-status');
+    statusEl.className = 'status-msg';
+
+    if (!clinicDataCache) {
+      statusEl.textContent = 'No se pudo cargar la configuración actual.';
+      statusEl.className = 'status-msg error';
+      return;
+    }
+
+    // Mezcla los campos editados con el JSON completo cacheado
+    const updated = {
+      ...clinicDataCache,
+      clinic: {
+        ...clinicDataCache.clinic,
+        name:    document.getElementById('cfg-name').value,
+        slogan:  document.getElementById('cfg-slogan').value,
+        city:    document.getElementById('cfg-city').value,
+        address: document.getElementById('cfg-address').value,
+      },
+      contact: {
+        ...clinicDataCache.contact,
+        whatsapp: document.getElementById('cfg-whatsapp').value,
+        phone:    document.getElementById('cfg-phone').value,
+      },
+      schedule: {
+        ...clinicDataCache.schedule,
+        monday_friday: document.getElementById('cfg-sched-wk').value,
+        saturday:      document.getElementById('cfg-sched-sat').value,
+      },
+    };
+
+    const res = await apiFetch('/admin/clinic', {
+      method: 'PUT',
+      body: JSON.stringify(updated),
+    });
+
+    if (res && res.ok) {
+      clinicDataCache = updated;
+      statusEl.textContent = '✓ Cambios guardados correctamente.';
+      statusEl.className = 'status-msg success';
+    } else {
+      statusEl.textContent = '✗ Error al guardar. Revisa los logs del servidor.';
+      statusEl.className = 'status-msg error';
+    }
+
+    setTimeout(() => { statusEl.className = 'status-msg'; }, 4000);
+  }
+
+  // ── Tabs ───────────────────────────────────────────────────────────────────
+
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', ['stats','conversations','config'][i] === name);
+    });
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`tab-${name}`).classList.add('active');
+  }
+
+  // ── Arranque ───────────────────────────────────────────────────────────────
+
+  if (getToken()) {
+    showDashboard();
+  }
+</script>
+</body>
+</html>
