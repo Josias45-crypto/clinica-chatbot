@@ -14,5 +14,9 @@ router = APIRouter()
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
-    reply, model_used = await get_chat_reply(request.history, request.message)
+    reply, model_used = await get_chat_reply(
+        request.history,
+        request.message,
+        request.session_id,   # pasa session_id al service para persistencia
+    )
     return ChatResponse(reply=reply, model_used=model_used)
